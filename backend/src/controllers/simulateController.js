@@ -1,4 +1,5 @@
 const express = require('express');
+const { broadcast } = require('../wsManager');
 const router = express.Router();
 const {
   getActiveAccounts,
@@ -103,6 +104,15 @@ router.post('/simulate/haha', async (req, res) => {
         await client.say(current_channel, msg);
         await lockAccount(id, 10);
         console.log(`[ХАХА] ${username} -> #${current_channel}: ${msg}`);
+
+        // ⬇️ Рассылаем через WebSocket
+        broadcast({
+          type: 'haha',
+          username,
+          message: msg,
+          channel: current_channel,
+          timestamp: new Date().toISOString()
+        });
       } catch (err) {
         console.error(`[ХАХА-ошибка] ${username}:`, err.message);
       }

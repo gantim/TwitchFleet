@@ -1,32 +1,29 @@
 const express = require('express');
-const app = express();
-const PORT = process.env.PORT || 3000;
+const http = require('http');
+const WebSocket = require('ws');
 const dotenv = require('dotenv');
-const { initAccountTable } = require('./models/accountModel');
+const { register } = require('./wsManager');
+
+dotenv.config();
+
+const app = express();
+const server = http.createServer(app);
+const wss = new WebSocket.Server({ server });
+
+wss.on('connection', (ws) => {
+  console.log('🟢 WebSocket клиент подключён');
+  register(ws);
+});
+
 const messageRoutes = require('./controllers/messageController');
 const accountRoutes = require('./controllers/accountController');
 const joinChannelRoutes = require('./controllers/joinChannelController');
 const simulateRoutes = require('./controllers/simulateController');
 
-dotenv.config();
-
 app.use(express.json());
-
-// Подключение маршрутов
 app.use('/api', messageRoutes);
 app.use('/api', accountRoutes);
 app.use('/api', joinChannelRoutes);
 app.use('/api', simulateRoutes);
 
-// Запуск сервера
-(async () => {
-  try {
-    await initAccountTable();
-    app.listen(PORT, () => {
-      console.log(`🚀 Сервер запущен на http://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error('Ошибка инициализации:', err);
-    process.exit(1);
-  }
-})();
+module.exports = { app, server };
