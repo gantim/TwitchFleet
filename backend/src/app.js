@@ -1,29 +1,28 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
-const dotenv = require('dotenv');
-const { register } = require('./wsManager');
+const express = require('express')
+const http = require('http')
+const dotenv = require('dotenv')
+const userRouter = require('./routes/user.routes')
+const adminRoutes = require('./routes/admin.routes');
+const accountRoutes = require('./routes/account.routes');
 
-dotenv.config();
+dotenv.config()
 
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const app = express()
+const server = http.createServer(app)
+const PORT = process.env.PORT || 3000
 
-wss.on('connection', (ws) => {
-  console.log('🟢 WebSocket клиент подключён');
-  register(ws);
-});
+app.use(express.json())
 
-const messageRoutes = require('./controllers/messageController');
-const accountRoutes = require('./controllers/accountController');
-const joinChannelRoutes = require('./controllers/joinChannelController');
-const simulateRoutes = require('./controllers/simulateController');
+app.use('/api', userRouter);
+app.use('/api/admin', adminRoutes);
+app.use('/api/admin', accountRoutes);
 
-app.use(express.json());
-app.use('/api', messageRoutes);
-app.use('/api', accountRoutes);
-app.use('/api', joinChannelRoutes);
-app.use('/api', simulateRoutes);
+const start = async () => {
+  try {
+    server.listen(PORT, () => console.log(`Сервер слушает на http://localhost:${PORT}`))
+  } catch (e) {
+    console.log(e)
+  }
+}
 
-module.exports = { app, server };
+start()

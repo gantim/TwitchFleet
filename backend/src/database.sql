@@ -1,0 +1,17 @@
+CREATE TABLE users (
+  id SERIAL PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  role TEXT DEFAULT 'user'
+);
+
+CREATE TABLE accounts (
+  id SERIAL PRIMARY KEY,
+  username TEXT UNIQUE NOT NULL,
+  oauth_token TEXT NOT NULL,
+  type TEXT,
+  active BOOLEAN DEFAULT TRUE,
+  current_channel TEXT,
+  locked_until TIMESTAMP WITHOUT TIME ZONE,
+  created_at TIMESTAMP WITHOUT TIME ZONE DEFAULT CURRENT_TIMESTAMP
+);
