@@ -1,5 +1,5 @@
 const bcrypt = require('bcrypt');
-const pool = require('../db');
+const pool = require('../config/db');
 
 class AdminController {
   async getAllUsers(req, res) {

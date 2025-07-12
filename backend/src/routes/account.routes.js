@@ -1,9 +1,8 @@
 const express = require('express');
 const router = express.Router();
-const accountController = require('../controller/account.controller');
+const accountController = require('../controllers/account.controller');
 const auth = require('../middleware/auth');
 
-// Только для администратора
 router.get('/accounts', auth('admin'), accountController.getAll);
 router.get('/accounts/:id', auth('admin'), accountController.getOne);
 router.post('/accounts', auth('admin'), accountController.create);

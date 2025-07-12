@@ -1,7 +1,8 @@
 const express = require('express')
 const http = require('http')
 const dotenv = require('dotenv')
-const userRouter = require('./routes/user.routes')
+const pool = require('./config/db')
+const authRouter = require('./routes/auth.routes')
 const adminRoutes = require('./routes/admin.routes');
 const accountRoutes = require('./routes/account.routes');
 
@@ -11,11 +12,19 @@ const app = express()
 const server = http.createServer(app)
 const PORT = process.env.PORT || 3000
 
+pool.query('SELECT NOW()', (err, res) => {
+  if(err){
+    console.error('Не удалось подключиться к базеданных.', err.stack); 
+  } else {
+    console.log('Успешное подключение к базеданных:', res.rows);
+  }
+})
+
 app.use(express.json())
 
-app.use('/api', userRouter);
-app.use('/api/admin', adminRoutes);
-app.use('/api/admin', accountRoutes);
+app.use('/api/auth', authRouter);
+// app.use('/api/admin', adminRoutes);
+// app.use('/api/admin', accountRoutes);
 
 const start = async () => {
   try {

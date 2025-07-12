@@ -1,9 +1,6 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-/**
- * @param {string | null} role - если указан, будет проверяться роль пользователя
- */
 function authMiddleware(role = null) {
   return (req, res, next) => {
     const authHeader = req.headers.authorization;
