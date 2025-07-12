@@ -1,7 +1,7 @@
 const express = require('express')
-const http = require('http')
+const helmet = require('helmet');
 const dotenv = require('dotenv')
-const pool = require('./config/db')
+// const pool = require('./config/db')
 const authRouter = require('./routes/auth.routes')
 // const adminRoutes = require('./routes/admin.routes');
 // const accountRoutes = require('./routes/account.routes');
@@ -9,8 +9,6 @@ const authRouter = require('./routes/auth.routes')
 dotenv.config()
 
 const app = express()
-const server = http.createServer(app)
-const PORT = process.env.PORT || 3000
 
 // pool.query('SELECT NOW()', (err, res) => {
 //   if(err){
@@ -21,6 +19,7 @@ const PORT = process.env.PORT || 3000
 // })
 
 app.use(express.json())
+app.use(helmet());
 
 app.use('/api/auth', authRouter);
 // app.use('/api/admin', adminRoutes);
