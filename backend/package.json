@@ -4,17 +4,15 @@
   "description": "Twitch cheating",
   "main": "src/app.js",
   "scripts": {
-    "start": "node src/app.js",
-    "dev": "nodemon src/app.js"
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "test": "jest"
   },
   "dependencies": {
     "bcrypt": "^6.0.0",
-    "chai": "^5.2.1",
-    "chai-http": "^5.1.2",
     "dotenv": "^17.2.0",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mocha": "^11.7.1",
     "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "tmi.js": "^1.8.5",

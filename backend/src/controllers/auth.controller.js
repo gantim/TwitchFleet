@@ -1,54 +1,15 @@
 const pool = require('../config/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { useDebugValue } = require('react');
+const validate = require('../middleware/validate');
 require('dotenv').config();
-
-class Validate {
-  async validatePassName(req, res){
-    const { username, password } = req.body;
-    const errors = []
-
-    if (!username || username === 0) {
-      errors.push('Имя пользователя обязательно')
-    } else { 
-      if (username.length <= 4 || username >= 32) {
-        errors.push('Имя пользователя должно быть от 3 до 32 символов')
-      }
-
-      const usernameRegex = /^[a-zA-Z0-9_.-]+$/;
-      if(!usernameRegex.test(username)) {
-        errors.push('Имя пользователя может содержать только латинские буквы, цифры, "-", "_" и "."')
-      }
-    }
-
-    if (!password || password === 0) {
-      errors.push('Пароль обязателен')
-    } else { 
-      if (password.length <= 4 || password >= 32) {
-        errors.push('Пароль должен быть от 4 до 32 символов')
-      }
-
-      const passwordRegex = /^(?=.*[а-яА-Яa-zA-Z])(?=.*\d)(?=.*[!@#$%^&*()_+=\-[\]{};':"\\|,.<>/?]).{6,64}$/;
-      if(!passwordRegex.test(password)) {
-        errors.push('Пароль должен содержать буквы, цифры и хотя бы один специальный символ')
-      }
-    }
-
-    if (errors.length > 0) {
-      return res.status(400).json({ errors })
-    }
-
-    return true
-  }
-}
 
 class AuthController {
   async register(req, res){
     try {
       const { username, password, role = 'user'} = req.body
 
-      const errors = Validate.validatePassName(username,password);
+      const errors = validate.validatePassName(username, password);
       if (errors.length > 0) {
         return res.status(400).json({ errors })
       }
@@ -61,20 +22,27 @@ class AuthController {
 
       const hash = await bcrypt.hash(password, 10)
       const newUser = await pool.query(
-        'INSERT INTO user (username, password, role) VALUES ($1, $2, $3) RETURNING id, username, role',
+        'INSERT INTO users (username, password, role) VALUES ($1, $2, $3) RETURNING id, username, role',
         [username, hash, role]
       )
 
       return res.status(201).json(newUser.rows[0])
     } catch (e) {
+      console.error('Ошибка регистрации:', e);
       res.status(500).json({error: 'Неизвестная ошибка регистрации'})
     }
   }
 
   async login(req, res){
     try {
-      const { username, password } = req.body;
-      const user = pool.query('SELECT * FROM users WHERE username = $1',
+      const username = req.body?.username;
+      const password = req.body?.password;
+
+      if (!username || !password) {
+        return res.status(400).json({ error: 'Поля обязательны' });
+      }
+
+      const user = await pool.query('SELECT * FROM users WHERE username = $1',
         [username]
       )
 
@@ -100,6 +68,7 @@ class AuthController {
       res.json({ token });
 
     } catch (e) {
+      console.error('Ошибка авторизации:', e);
       res.status(500).json({error: 'Неизвестная ошибка авторизации'})
     }
   }
@@ -107,10 +76,9 @@ class AuthController {
   async me(req, res) {
     try {
       const user = req.user;
-      res.json({ id: user.id,
-                 username: user.username,
-                 role: user.role });
+      res.json({ id: user.id, username: user.username, role: user.role });
     } catch (e) {
+      console.error('Ошибка получения данных:', e);
       res.status(500).json({ error: 'Ошибка получения данных' });
     }
   }
