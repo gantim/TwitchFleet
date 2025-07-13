@@ -2,18 +2,45 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleLogin = () => {
-    // TODO: логика логина
-    console.log("Login", { username, password });
+  const handleLogin = async () => {
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:4000/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Ошибка входа");
+        return;
+      }
+
+      // Предположим, что backend возвращает access token
+      localStorage.setItem("token", data.token || data.accessToken);
+      router.push("/main");
+    } catch (err) {
+      console.error(err);
+      setError("Ошибка сети или сервера");
+    }
   };
 
   const handleRegisterRedirect = () => {
-    window.location.href = "/register";
+    router.push("/register");
   };
 
   return (
@@ -54,6 +81,8 @@ export default function LoginPage() {
         >
           Register
         </button>
+
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       </div>
     </div>
   );

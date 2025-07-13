@@ -2,19 +2,45 @@
 
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+  const router = useRouter();
+
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
 
-  const handleRegister = () => {
-    // TODO: реализовать регистрацию
-    console.log("Register", { username, password });
+  const handleRegister = async () => {
+    setError("");
+
+    try {
+      const res = await fetch("http://localhost:4000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.message || "Ошибка регистрации");
+        return;
+      }
+
+      // Предполагаем, что в ответе есть токен (data.token или data.accessToken)
+      localStorage.setItem("token", data.token || data.accessToken);
+      router.push("/main");
+    } catch (err) {
+      console.error("Ошибка при регистрации:", err);
+      setError("Ошибка сети или сервера");
+    }
   };
 
   const handleLoginRedirect = () => {
-    // TODO: заменить на переход через useRouter или Link
-    window.location.href = "/login";
+    router.push("/login");
   };
 
   return (
@@ -57,6 +83,8 @@ export default function RegisterPage() {
         >
           Login
         </button>
+
+        {error && <p className="text-red-500 text-sm text-center">{error}</p>}
       </div>
     </div>
   );
