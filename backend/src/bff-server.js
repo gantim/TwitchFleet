@@ -1,13 +1,14 @@
-const dotenv = require('dotenv')
+const dotenv = require('dotenv');
 const express = require('express');
 const rateLimit = require('express-rate-limit');
 const cors = require('cors');
+const { WebSocketServer } = require('ws');
+const http = require('http');
 
 dotenv.config()
 
 const app = express();
 app.use(express.json());
-app.use(cors()); 
 
 // // Проверка User-Agent
 // app.use((req, res, next) => {
@@ -20,13 +21,19 @@ app.use(cors());
 
 // Проверка Origin
 const allowedOrigins = [process.env.FRONTEND_URL];
-app.use((req, res, next) => {
-  const origin = req.headers.origin;
-  if (!origin || !allowedOrigins.includes(origin)) {
-    return res.status(403).json({ error: 'Запрещённый Origin' });
-  }
-  next();
-});
+const corsOptions = {
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true, // если ты используешь cookie / авторизацию
+};
+
+app.use(cors(corsOptions));
 
 // Rate Limit (пример — регистрация)
 const registerLimiter = rateLimit({
@@ -99,5 +106,21 @@ app.post('/users/unbind-user', forward('POST', () => '/api/users/unbind-user'));
 app.post('/users/unbind-account', forward('POST', () => '/api/users/unbind-account'));
 app.get('/users/:id', forward('GET', req => `/api/users/${req.params.id}`));
 
+const server = http.createServer(app);
+const wss = new WebSocketServer({ server });
+
+wss.on('connection', (ws) => {
+  console.log('Клиент WebSocket подключен');
+
+  ws.on('message', (message) => {
+    console.log('Сообщение от клиента:', message.toString());
+    ws.send(`Принято: ${message.toString()}`);
+  });
+
+  ws.on('close', () => {
+    console.log('Клиент отключился');
+  });
+});
+
 const PORTBFF = process.env.PORTBFF || 4000;
-app.listen(PORTBFF, () => console.log(`BFF работает на http://localhost:${PORTBFF}`));
+server.listen(PORTBFF, () => console.log(`BFF работает на http://localhost:${PORTBFF}`));

@@ -5,6 +5,9 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function RegisterPage() {
+
+
+
   const router = useRouter();
 
   const [username, setUsername] = useState("");
