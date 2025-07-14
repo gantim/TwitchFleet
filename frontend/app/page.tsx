@@ -1,103 +1,152 @@
+"use client";
+
 import Image from "next/image";
+import { useState } from "react";
 
-export default function Home() {
+export default function MainPage() {
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [channel, setChannel] = useState("sontce3");
+  const [streamKey, setStreamKey] = useState("sontce3");
+
+  const handleConnectStream = () => {
+    setStreamKey(channel);
+  };
+
+  const handleConnectBots = () => {
+    alert(`Боты подключены к каналу: ${channel}`);
+  };
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen flex flex-col">
+      {/* Header */}
+      <header className="w-full flex items-center justify-between px-6 py-4 bg-white shadow-sm">
+        <div className="flex items-center gap-2">
+          <Image src="/tf.ico" alt="TF Logo" width={36} height={36} />
+        </div>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+        <div className="flex items-center gap-4">
+          <button className="bg-neutral-100 text-sm px-4 py-1.5 rounded hover:bg-neutral-200">
+            Панель управления
+          </button>
+          <button className="text-sm px-4 py-1.5 rounded hover:underline">
+            Админ панель
+          </button>
+        </div>
+
+        <div className="relative">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className="w-8 h-8 flex items-center justify-center rounded-full bg-red-400 hover:opacity-80 overflow-hidden"
+          ></button>
+          {menuOpen && (
+            <div className="absolute right-0 mt-6 w-40 bg-white rounded-md shadow-md py-2 z-10">
+              <button className="block w-full px-4 py-2 text-sm hover:bg-neutral-100 text-left">
+                Выйти
+              </button>
+            </div>
+          )}
+        </div>
+      </header>
+
+      {/* Content */}
+      <main className="flex-1 bg-[#2d2d2d] grid grid-cols-[300px_1fr_1fr] grid-rows-[auto_1fr_auto] gap-4 p-4 text-white">
+        {/* Левая панель */}
+        <div className="col-start-1 row-span-3 flex flex-col gap-4 overflow-hidden">
+          <textarea
+            placeholder="Введите сообщение..."
+            className="bg-[#1f1f1f] p-4 rounded resize-none h-24 text-sm"
+          ></textarea>
+
+          <div className="bg-[#1f1f1f] p-4 rounded">
+            <button className="text-sm mb-2 border-b border-purple-500 w-full text-left">
+              Скрипты
+            </button>
+            <div className="grid grid-cols-4 gap-2 text-xs">
+              {Array.from({ length: 16 }).map((_, i) => (
+                <button key={i} className="bg-black p-2 rounded">
+                  {i === 0 ? "ХАХА" : `C${i}`}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="bg-[#1f1f1f] p-4 rounded flex-1 overflow-auto">
+            <button className="text-sm mb-2 border-b border-lime-400 w-full text-left">
+              История подключений
+            </button>
+            {[...Array(20)].map((_, i) => (
+              <div key={i} className="mb-1 text-sm">
+                Канал {i + 1}<br />Боты: бот1, бот2, бот3
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Центр: подключенные аккаунты */}
+        <div className="col-start-2 row-span-2 flex flex-col gap-4 overflow-hidden">
+          <div className="bg-[#1f1f1f] p-4 rounded flex-1 overflow-auto">
+            <button className="text-sm mb-2 border-b border-cyan-400 w-full text-left">
+              Подключенные аккаунты
+            </button>
+            {[...Array(40)].map((_, i) => (
+              <div key={i} className="py-0.5 text-sm">Бот {i + 1}</div>
+            ))}
+          </div>
+        </div>
+
+        <div className="col-start-2 row-start-3">
+          <div className="bg-[#1f1f1f] p-4 rounded h-[240px] overflow-auto">
+            <button className="text-sm mb-2 border-b border-green-400 w-full text-left">
+              Подключение аккаунтов
+            </button>
+            <div className="text-xs mb-2 flex items-center gap-2">
+              Канал:
+              <input
+                value={channel}
+                onChange={(e) => setChannel(e.target.value)}
+                className="bg-neutral-800 px-2 py-1 rounded text-white text-xs w-32"
+              />
+              <button
+                onClick={handleConnectStream}
+                className="bg-green-600 hover:bg-green-700 text-white text-xs px-2 py-1 rounded"
+              >
+                Подключиться
+              </button>
+              <button
+                onClick={handleConnectBots}
+                className="bg-blue-600 hover:bg-blue-700 text-white text-xs px-2 py-1 rounded"
+              >
+                Подключить ботов
+              </button>
+            </div>
+            <div className="grid grid-cols-4 gap-1">
+              {[...Array(60)].map((_, i) => (
+                <div key={i} className="text-center p-1 bg-black rounded">Бот {i + 1}</div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Стрим */}
+        <div className="col-start-3 row-start-1 row-span-2 flex flex-col">
+          <div className="bg-black rounded overflow-hidden aspect-video w-full">
+            <iframe
+              src={`https://player.twitch.tv/?muted=true&parent=localhost&channel=${streamKey}`}
+              allowFullScreen
+              className="w-full h-full"
+            ></iframe>
+          </div>
+
+          {/* История чатов ботов */}
+          <div className="grid grid-cols-4 gap-2 mt-4">
+            {[...Array(8)].map((_, i) => (
+              <div key={i} className="bg-[#1f1f1f] p-3 rounded text-xs text-center h-40">
+                История чата {i + 1} бота
+              </div>
+            ))}
+          </div>
         </div>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
     </div>
   );
 }

@@ -1,7 +1,11 @@
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
 
-function authMiddleware(role = null) {
+function authMiddleware(roles = []) {
+  if (typeof roles === 'string') {
+    roles = [roles]; // поддержка строки типа 'admin'
+  }
+
   return (req, res, next) => {
     const authHeader = req.headers.authorization;
     const token = authHeader?.split(' ')[1];
@@ -12,7 +16,7 @@ function authMiddleware(role = null) {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       req.user = decoded;
 
-      if (role && decoded.role !== role) {
+      if (roles.length > 0 && !roles.includes(decoded.role)) {
         return res.status(403).json({ error: 'Недостаточно прав' });
       }
 

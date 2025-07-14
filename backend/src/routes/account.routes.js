@@ -1,12 +1,16 @@
 const express = require('express');
 const router = express.Router();
 const accountController = require('../controllers/account.controller');
+const checkInternalKey = require('../middleware/internalKey');
 const auth = require('../middleware/auth');
 
-router.get('/accounts', auth('admin'), accountController.getAll);
-router.get('/accounts/:id', auth('admin'), accountController.getOne);
-router.post('/accounts', auth('admin'), accountController.create);
-router.put('/accounts', auth('admin'), accountController.update);
-router.delete('/accounts/:id', auth('admin'), accountController.delete);
+router.get('/', checkInternalKey, auth(['admin', 'moderator']), accountController.getAllAccounts);
+router.get('/:id', checkInternalKey, auth(['admin', 'moderator']), accountController.getAccount);
+router.post('/', checkInternalKey, auth(['admin', 'moderator']), accountController.createAccount);
+router.put('/', checkInternalKey, auth(['admin', 'moderator']), accountController.updateAccount);
+router.delete('/:id', checkInternalKey, auth(['admin', 'moderator']), accountController.deleteAccount);
+router.post('/connect/:id', checkInternalKey, auth(['admin', 'moderator']), accountController.connectAccount);
+router.post('/disconnect/:id', checkInternalKey, auth(['admin', 'moderator']), accountController.disconnectAccount);
+router.post('/message/:id', checkInternalKey, auth(['admin', 'moderator']), accountController.messageAccount);
 
 module.exports = router;
