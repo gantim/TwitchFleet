@@ -63,7 +63,9 @@ function forward(method, url, extraHeaders = {}) {
     });
 
     const data = await response.json().catch(() => ({}));
+    if (process.env.NODE_ENV === 'development') {
     console.log('[BFF RAW RESPONSE]', data); // ← теперь это реальный объект, не строка
+    }
     res.status(response.status).json(data);
   };
 }

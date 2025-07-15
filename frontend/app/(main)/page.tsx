@@ -1,15 +1,41 @@
+'use client';
+
+import { useState } from 'react';
+import { useMemo } from 'react';
 import CentralColumn from '@/components/CentralColumn';
+import MessageGrid from '@/components/MessageGrid';
+
+type Bot = {
+  id: number;
+  name: string;
+  connected: boolean;
+};
 
 export default function MainPage() {
+  const [message, setMessage] = useState('');
+  const [channel, setChannel] = useState('');
+  const [connectedBots, setConnectedBots] = useState<Bot[]>([]);
+  const [messageUpdateTrigger, setMessageUpdateTrigger] = useState(0);
+
+  const connectedBotsMapped = useMemo(
+    () => connectedBots.map(bot => ({ id: bot.id, name: bot.name })),
+    [connectedBots]
+  );
+
+  const handleChannelChange = (value: string) => {
+    setChannel(value);
+  };
   return (
     <div className="w-screen h-screen overflow-hidden bg-[#3A3A3A] text-white flex">
       {/* Левый столбец */}
-      <div className="w-[15%] p-[10px] flex flex-col gap-3">
+      <div className="w-[20%] p-[10px] flex flex-col gap-3">
         {/* Блок ввода сообщения */}
         <div className="h-[20%] bg-[#222222] rounded-xl p-3">
           <textarea
             className="w-full h-full resize-none bg-transparent text-white placeholder:text-gray-300 outline-none"
             placeholder="Введите сообщение..."
+            value={message}
+            onChange={e => setMessage(e.target.value)}
           />
         </div>
 
@@ -43,21 +69,32 @@ export default function MainPage() {
 
       {/* Центральный столбец */}
       <div className="w-[30%] -ml-2 p-[10px] flex flex-col gap-3">
-        <CentralColumn />
+        <CentralColumn
+          message={message}
+          onMessageChange={setMessage}
+          onChannelSubmit={setChannel}
+          onConnectedChange={setConnectedBots}
+          onMessageSent={() => setMessageUpdateTrigger(prev => prev + 1)} // ← добавлено
+        />
       </div>
 
       {/* Правый столбец */}
-      <div className="flex-1 flex flex-col">
-        {/* Видеоблок 16:9 */}
-        <div className="aspect-video w-full bg-black">
-          {/* Здесь можно вставить iframe Twitch или видео */}
-          <p className="p-4">Стрим</p>
+      <div className="flex-1 flex flex-col -ml-1">
+        <div className="aspect-video w-full h-[50%] bg-black">
+          <iframe
+            src={`https://player.twitch.tv/?muted=true&parent=localhost&channel=${channel}`}
+            height="100%"
+            width="100%"
+            allowFullScreen
+          ></iframe>
         </div>
-
-        {/* Оставшаяся часть */}
-        <div className="flex-1 bg-neutral-950 p-4 overflow-auto">
-          <p>Контент под стримом</p>
-        </div>
+          <div className="flex-1 p-2 overflow-auto">
+            <MessageGrid
+              connectedBots={connectedBots.map(bot => ({ id: bot.id, name: bot.name }))}
+              updateTrigger={messageUpdateTrigger}
+              channel={channel} // ← обязательно!
+            />
+          </div>
       </div>
     </div>
   );

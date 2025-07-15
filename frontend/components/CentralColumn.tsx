@@ -2,17 +2,25 @@
 
 import { useEffect, useState } from 'react';
 
+type Props = {
+  message: string;
+  onMessageChange: (msg: string) => void;
+  onChannelSubmit: (channel: string) => void;
+  onConnectedChange: (bots: Bot[]) => void;
+  onMessageSent?: () => void; // ← добавить
+};
+
 type Bot = {
   id: number;
   name: string;
   connected: boolean;
 };
 
-export default function CentralColumn() {
+export default function CentralColumn({ message, onChannelSubmit, onMessageChange, onConnectedChange, onMessageSent }: Props) {
   const [bots, setBots] = useState<Bot[]>([]);
   const [connectedBots, setConnectedBots] = useState<Bot[]>([]);
-  const [channel, setChannel] = useState('');
   const [loading, setLoading] = useState(true);
+  const [channelInput, setChannelInput] = useState('');
 
   useEffect(() => {
     const loadBots = async () => {
@@ -59,48 +67,69 @@ export default function CentralColumn() {
     loadBots();
   }, []);
 
-  const toggleBot = async (botId: number) => {
+  const handleSendMessage = async (botId: number) => {
+    try {
+        const token = localStorage.getItem('token');
+        await fetch(`http://localhost:4000/accounts/message/${botId}`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({ text: message }),
+        });
+
+        console.log(`Сообщение отправлено от бота ${botId}`);
+        onMessageChange('');
+        onMessageSent?.();
+    } catch (err) {
+        console.error('Ошибка при отправке сообщения:', err);
+    }
+    };
+
+    const toggleBot = async (botId: number, channel: string) => {
     const bot = bots.find(b => b.id === botId);
     if (!bot) return;
 
     const endpoint = bot.connected ? 'disconnect' : 'connect';
 
     try {
-      const token = localStorage.getItem('token');
-      await fetch(`http://localhost:4000/accounts/${endpoint}/${botId}`, {
+        const token = localStorage.getItem('token');
+        await fetch(`http://localhost:4000/accounts/${endpoint}/${botId}`, {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             Authorization: `Bearer ${token}`,
-         },
-         body: JSON.stringify({ channel }),
-      });
+        },
+        body: JSON.stringify({ channel }),
+        });
 
-      const updatedBots = bots.map(b =>
+        const updatedBots = bots.map(b =>
         b.id === botId ? { ...b, connected: !b.connected } : b
-      );
-      setBots(updatedBots);
+        );
+        setBots(updatedBots);
 
-      if (!bot.connected) {
-        setConnectedBots(prev => [...prev, bot]);
-      } else {
-        setConnectedBots(prev => prev.filter(b => b.id !== botId));
-      }
+        let updatedConnected: Bot[];
+        if (!bot.connected) {
+        const newBot = { ...bot, connected: true };
+        const newConnected = [...connectedBots, newBot];
+        setConnectedBots(newConnected);
+        updatedConnected = newConnected;
+        } else {
+        const filtered = connectedBots.filter(b => b.id !== botId);
+        setConnectedBots(filtered);
+        updatedConnected = filtered;
+        }
+
+        // 🔥 Важно: пробрасываем обновление наверх
+        onConnectedChange(updatedConnected);
     } catch (err) {
-      console.error('Ошибка подключения/отключения:', err);
+        console.error('Ошибка подключения/отключения:', err);
     }
-  };
-
-  const handleChannelChange = (value: string) => {
-    setChannel(value);
-    // отключаем всех ботов
-    bots.forEach(bot => {
-      if (bot.connected) toggleBot(bot.id); // вызываем disconnect
-    });
-  };
+    };
 
   return (
-    <div className="flex flex-col h-full w-full gap-4">
+    <div className="flex flex-col h-full w-full gap-3">
       {/* ===== Блок 1: Подключенные аккаунты ===== */}
       <div className="h-[33%] bg-transparent flex flex-col gap-2">
         <div className="bg-[#222222] rounded-xl p-3 flex flex-col h-full">
@@ -108,12 +137,13 @@ export default function CentralColumn() {
           <div className="h-[5px] rounded-full bg-cyan-400 mb-3 w-full" />
           <div className="overflow-y-auto flex-1 custom-scroll flex flex-col gap-2 pr-2">
             {connectedBots.map(bot => (
-              <div
+            <button
                 key={bot.id}
-                className="bg-[#2a2a2a] text-white text-center rounded-md py-2"
-              >
+                onClick={() => handleSendMessage(bot.id)}
+                className="bg-[#2a2a2a] text-white text-center rounded-md py-2 hover:bg-[#3a3a3a] transition"
+            >
                 {bot.name}
-              </div>
+            </button>
             ))}
           </div>
         </div>
@@ -129,40 +159,44 @@ export default function CentralColumn() {
             <input
               type="text"
               placeholder="Канал"
-              value={channel}
-              onChange={e => handleChannelChange(e.target.value)}
+              value={channelInput}
+              onChange={e => setChannelInput(e.target.value)}
               className="flex-1 bg-[#333] text-white px-2 py-1 rounded-md outline-none"
             />
-            <button className="bg-green-600 hover:bg-green-500 text-white px-3 rounded-md transition">
-              Подключить
+            <button
+            onClick={() => {
+            onChannelSubmit(channelInput);
+            bots.forEach(bot => {
+                if (bot.connected) toggleBot(bot.id, channelInput); // 👈 тоже передаём
+            });
+            }}
+            className="bg-green-600 hover:bg-green-500 text-white px-3 rounded-md transition"
+            >
+            Подключить
             </button>
           </div>
 
           <div className="flex-1 overflow-y-auto pr-2 custom-scroll grid grid-cols-3 gap-2">
-            {loading ? (
-              <p className="text-white col-span-4">Загрузка...</p>
-            ) : (
-              bots.map(bot => (
-                <button
-                  key={bot.id}
-                  onClick={() => toggleBot(bot.id)}
-                  className="flex items-center justify-start gap-2 px-2 py-1 rounded-md bg-[#2a2a2a] hover:bg-neutral-700 text-white text-sm transition"
-                >
-                  <div
-                    className={`w-3 h-3 rounded-sm ${
-                      bot.connected ? 'bg-green-500' : 'bg-red-500'
-                    }`}
-                  />
-                  {bot.name}
-                </button>
-              ))
-            )}
+            {bots.map(bot => (
+            <button
+                key={bot.id}
+                onClick={() => toggleBot(bot.id, channelInput)} // 👈 передаём канал
+                className="flex items-center justify-start gap-2 px-2 py-1 rounded-md bg-[#2a2a2a] hover:bg-neutral-700 text-white text-sm transition"
+            >
+                <div
+                className={`w-3 h-3 rounded-sm ${
+                    bot.connected ? 'bg-green-500' : 'bg-red-500'
+                }`}
+                />
+                {bot.name}
+            </button>
+            ))}
           </div>
         </div>
       </div>
 
       {/* ===== Блок 3: Пустой ===== */}
-      <div className="h-[34%] bg-transparent rounded-xl" />
+      <div className="h-[34%] bg-[#222222] rounded-xl " />
     </div>
   );
 }
