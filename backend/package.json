@@ -1,9 +1,40 @@
 {
+  "name": "backend",
+  "version": "1.2.5",
+  "description": "Twitch cheating",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js",
+    "devbff": "nodemon src/bff-server.js",
+    "test": "jest"
+  },
   "dependencies": {
-    "dotenv": "^17.1.0",
+    "bcrypt": "^6.0.0",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.0",
     "express": "^5.1.0",
+    "express-rate-limit": "^7.5.1",
+    "helmet": "^8.1.0",
+    "jsonwebtoken": "^9.0.2",
+    "node-fetch": "^3.3.2",
+    "nodemon": "^3.1.10",
     "pg": "^8.16.3",
     "tmi.js": "^1.8.5",
     "ws": "^8.18.3"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gantim/TwitchFleet.git"
+  },
+  "author": "Keny",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/gantim/TwitchFleet/issues"
+  },
+  "homepage": "https://github.com/gantim/TwitchFleet#readme",
+  "devDependencies": {
+    "jest": "^30.0.4",
+    "supertest": "^7.1.3"
   }
 }

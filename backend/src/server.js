@@ -1,15 +1,15 @@
-const { server, broadcast } = require('./app');
-const { initAccountTable } = require('./models/accountModel');
+const http = require('http');
+const app = require('./app');
+const PORT = process.env.PORT || 8000;
 
-const PORT = process.env.PORT || 3000;
+const server = http.createServer(app);
 
-(async () => {
+const start = async () => {
   try {
-    await initAccountTable();
-    server.listen(PORT, () => {
-      console.log(`🚀 Сервер (с WS) запущен: http://localhost:${PORT}`);
-    });
-  } catch (err) {
-    console.error('Ошибка запуска сервера:', err);
+    server.listen(PORT, () => console.log(`Сервер слушает на http://localhost:${PORT}`))
+  } catch (e) {
+    console.log(e)
   }
-})();
+}
+
+start()

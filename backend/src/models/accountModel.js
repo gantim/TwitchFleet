@@ -1,67 +1,51 @@
-const { Pool } = require('pg');
-const pool = new Pool();
+const pool = require('../config/db');
 
-// Инициализация таблицы при старте (один раз)
-async function initAccountTable() {
-  await pool.query(`
-    CREATE TABLE IF NOT EXISTS accounts (
-      id SERIAL PRIMARY KEY,
-      username TEXT NOT NULL,
-      oauth_token TEXT NOT NULL,
-      type TEXT CHECK (type IN ('chat', 'viewer')) NOT NULL,
-      active BOOLEAN DEFAULT true,
-      current_channel TEXT,
-      locked_until TIMESTAMP,
-      created_at TIMESTAMP DEFAULT NOW(),
-      UNIQUE(username)
-    )
-  `);
-}
+const AccountModel = {
+  async getAll() {
+    const result = await pool.query('SELECT id, oauth_token, type, active, current_channel, locked_until, created_at FROM accounts');
+    return result.rows;
+  },
 
-async function getActiveAccounts(type = 'chat') {
-  const { rows } = await pool.query(
-    'SELECT * FROM accounts WHERE active = true AND type = $1',
-    [type]
-  );
-  return rows;
-}
+  async findById(id) {
+    const result = await pool.query('SELECT * FROM accounts WHERE id = $1', [id]);
+    return result.rows[0];
+  },
 
-async function lockAccount(id, seconds = 10) {
-  await pool.query(
-    'UPDATE accounts SET locked_until = NOW() + ($1 || \' seconds\')::INTERVAL WHERE id = $2',
-    [seconds, id]
-  );
-}
+  async findByUsername(username) {
+    const result = await pool.query('SELECT * FROM accounts WHERE username = $1', [username]);
+    return result.rows[0];
+  },
 
-async function updateChannel(id, channel) {
-  await pool.query(
-    'UPDATE accounts SET current_channel = $1 WHERE id = $2',
-    [channel, id]
-  );
-}
+  async create({ username, oauth_token, type, active = false, current_channel = null, locked_until = null }) {
+    const result = await pool.query(
+      `INSERT INTO accounts (username, oauth_token, type, active, current_channel, locked_until)
+       VALUES ($1, $2, $3, $4, $5, $6)
+       RETURNING *`,
+      [username, oauth_token, type, active, current_channel, locked_until]
+    );
+    return result.rows[0];
+  },
 
-async function getAccountById(id) {
-  const { rows } = await pool.query('SELECT * FROM accounts WHERE id = $1', [id]);
-  return rows[0];
-}
+  async update({ id, username, oauth_token, type, active, current_channel, locked_until }) {
+    const result = await pool.query(
+      `UPDATE accounts
+       SET username = $1,
+           oauth_token = $2,
+           type = $3,
+           active = $4,
+           current_channel = $5,
+           locked_until = $6
+       WHERE id = $7
+       RETURNING *`,
+      [username, oauth_token, type, active, current_channel, locked_until, id]
+    );
+    return result.rows[0];
+  },
 
-async function getAvailableAccount(channel = null) {
-  const { rows } = await pool.query(
-    `SELECT * FROM accounts
-     WHERE type = 'chat' AND active = true
-       AND current_channel IS NOT NULL
-       AND (locked_until IS NULL OR locked_until < NOW())
-     LIMIT 1`
-  );
-  return rows[0];
-}
-
-module.exports = {
-  initAccountTable,
-  getActiveAccounts,
-  lockAccount,
-  updateChannel,
-  getAccountById,
-  getAvailableAccount,
-  pool,
+    async deleteById(id) {
+    const result = await pool.query('DELETE FROM accounts WHERE id = $1 RETURNING *', [id]);
+    return result.rowCount;
+  }
 };
+
+module.exports = AccountModel;

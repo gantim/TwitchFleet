@@ -1,29 +1,32 @@
-const express = require('express');
-const http = require('http');
-const WebSocket = require('ws');
-const dotenv = require('dotenv');
-const { register } = require('./wsManager');
+const express = require('express')
+const helmet = require('helmet')
+const dotenv = require('dotenv')
+const pool = require('./config/db')
+const authRouter = require('./routes/auth.routes')
+const accountRoutes = require('./routes/account.routes')
+const userRoutes = require('./routes/users.routes')
+const logsRoutes = require('./routes/logs.routes')
+// const scriptsRoutes = require('./routes/scripts.routes')
 
-dotenv.config();
+dotenv.config()
 
-const app = express();
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const app = express()
 
-wss.on('connection', (ws) => {
-  console.log('🟢 WebSocket клиент подключён');
-  register(ws);
-});
+pool.query('SELECT NOW()', (err, res) => {
+  if(err){
+    console.error('Не удалось подключиться к базеданных.', err.stack)
+  } else {
+    console.log('Успешное подключение к базеданных:', res.rows)
+  }
+})
 
-const messageRoutes = require('./controllers/messageController');
-const accountRoutes = require('./controllers/accountController');
-const joinChannelRoutes = require('./controllers/joinChannelController');
-const simulateRoutes = require('./controllers/simulateController');
+app.use(express.json())
+app.use(helmet())
 
-app.use(express.json());
-app.use('/api', messageRoutes);
-app.use('/api', accountRoutes);
-app.use('/api', joinChannelRoutes);
-app.use('/api', simulateRoutes);
+app.use('/api/auth', authRouter)
+app.use('/api/accounts', accountRoutes)
+app.use('/api/users', userRoutes)
+app.use('/api/logs', logsRoutes)
+// app.use('/api/scripts', scriptsRoutes)
 
-module.exports = { app, server };
+module.exports = app

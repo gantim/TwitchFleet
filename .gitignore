@@ -12,6 +12,10 @@ yarn-error.log*
 .cache/
 *.local
 
+# Сборка (если будет сборка или frontend)
+dist/
+build/
+
 # Electron
 *.asar
 electron-builder.yaml
@@ -32,6 +36,7 @@ __pycache__/
 
 # Env
 .env
+.env.* 
 
 # User data
 user_profiles/*
@@ -44,3 +49,8 @@ user_profiles/*
 *.blockmap
 *.yml
 
+# Тестовые артефакты
+coverage/
+test-results/
+jest-html-reporters-*
+*.log
