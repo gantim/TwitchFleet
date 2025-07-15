@@ -1,6 +1,7 @@
 const bcrypt = require('bcrypt');
 const UserModel = require('../models/userModel');
 const UserAccountService = require('../models/userModel');
+const validate = require('../middleware/validate');
 
 class UserController {
   async getAllUsers(req, res) {
@@ -30,6 +31,15 @@ class UserController {
       const user = await UserModel.findById(id);
       if (!user) return res.status(404).json({ error: 'Пользователь не найден' });
 
+      const validationErrors = validate.validatePassName(
+        username ?? user.username,
+        password ?? null
+      );
+
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ errors: validationErrors });
+      }
+    
       const updatedFields = {
         username: username ?? user.username,
         role: role ?? user.role,
@@ -62,6 +72,11 @@ class UserController {
   async createUser(req, res) {
     try {
       const { username, password, role = 'user' } = req.body;
+
+      const validationErrors = validate.validatePassName(username, password);
+      if (validationErrors.length > 0) {
+        return res.status(400).json({ errors: validationErrors });
+      }
 
       const existing = await UserModel.findByUsername(username);
       if (existing) {

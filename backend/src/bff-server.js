@@ -62,10 +62,8 @@ function forward(method, url, extraHeaders = {}) {
       body: ['GET', 'DELETE'].includes(method) ? undefined : JSON.stringify(req.body)
     });
 
-    const text = await response.text();
-    console.log('[BFF RAW RESPONSE]', text);
-
     const data = await response.json().catch(() => ({}));
+    console.log('[BFF RAW RESPONSE]', data); // ← теперь это реальный объект, не строка
     res.status(response.status).json(data);
   };
 }
