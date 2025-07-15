@@ -55,7 +55,7 @@ export default function MessageGrid({ connectedBots = [], updateTrigger, channel
   }, [connectedBots, updateTrigger]); // следим за updateTrigger
 
   if (connectedBots.length === 0) {
-    return <p className="text-white text-center">Ни один из аккаунтов не подключён</p>;
+    return <p className="text-white flex items-center justify-center h-full w-full font-bold text-3xl">Ни один из аккаунтов не подключён</p>;
   }
 
   const rows = connectedBots.length > 4 ? 2 : 1;
