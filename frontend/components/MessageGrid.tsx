@@ -64,7 +64,7 @@ export default function MessageGrid({ connectedBots = [], updateTrigger, channel
     <div className="w-[35%] h-full bg-[#222] rounded-xl overflow-hidden">
     {channel && (
         <iframe
-        src={`https://www.twitch.tv/embed/${channel}/chat?parent=213.176.65.26`}
+        src={`https://www.twitch.tv/embed/${channel}/chat?parent=nv-server.online`}
         height="100%"
         width="100%"
         ></iframe>

@@ -74,7 +74,7 @@ export default function MainPage() {
       <div className="flex-1 flex flex-col -ml-1">
         <div className="aspect-video w-full h-[50%] bg-black">
           <iframe
-            src={`https://player.twitch.tv/?muted=true&parent=213.176.65.26&channel=${channel}`}
+            src={`https://player.twitch.tv/?muted=true&parent=nv-server.online&channel=${channel}`}
             height="100%"
             width="100%"
             allowFullScreen
