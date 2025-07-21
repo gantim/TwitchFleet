@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/utils/api';
 
 type Props = {
   message: string;
@@ -27,7 +28,7 @@ export default function CentralColumn({ message, onChannelSubmit, onMessageChang
       try {
         // 1. Получаем текущего пользователя
         const token = localStorage.getItem('token');
-        const meRes = await fetch('http://localhost:4000/auth/me', {
+        const meRes = await fetch(`${API_URL}/auth/me`, {
           method: 'GET',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -38,7 +39,7 @@ export default function CentralColumn({ message, onChannelSubmit, onMessageChang
         if (!userId) throw new Error('Не удалось получить пользователя');
 
         // 2. Получаем аккаунты пользователя
-        const accountsRes = await fetch(`http://localhost:4000/users/${userId}/accounts`, {
+        const accountsRes = await fetch(`${API_URL}/users/${userId}/accounts`, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -70,7 +71,7 @@ export default function CentralColumn({ message, onChannelSubmit, onMessageChang
   const handleSendMessage = async (botId: number) => {
     try {
         const token = localStorage.getItem('token');
-        await fetch(`http://localhost:4000/accounts/message/${botId}`, {
+        await fetch(`${API_URL}/accounts/message/${botId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -95,7 +96,7 @@ export default function CentralColumn({ message, onChannelSubmit, onMessageChang
 
     try {
         const token = localStorage.getItem('token');
-        await fetch(`http://localhost:4000/accounts/${endpoint}/${botId}`, {
+        await fetch(`${API_URL}/accounts/${endpoint}/${botId}`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

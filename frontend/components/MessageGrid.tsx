@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { API_URL } from '@/utils/api';
 
 type Message = {
   id: number;
@@ -32,7 +33,7 @@ export default function MessageGrid({ connectedBots = [], updateTrigger, channel
       await Promise.all(
         connectedBots.map(async bot => {
           try {
-            const res = await fetch(`http://localhost:4000/logs/messages/${bot.id}`, {
+            const res = await fetch(`${API_URL}/logs/messages/${bot.id}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
@@ -67,7 +68,7 @@ export default function MessageGrid({ connectedBots = [], updateTrigger, channel
     <div className="w-[35%] h-full bg-[#222] rounded-xl overflow-hidden">
     {channel && (
         <iframe
-        src={`https://www.twitch.tv/embed/${channel}/chat?parent=213.176.65.26`}
+        src={`https://www.twitch.tv/embed/${channel}/chat?parent=213.176.65.26:3000`}
         height="100%"
         width="100%"
         ></iframe>
