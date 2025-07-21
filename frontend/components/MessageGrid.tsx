@@ -23,7 +23,6 @@ type Props = {
 
 export default function MessageGrid({ connectedBots = [], updateTrigger, channel }: Props) {
   const [logs, setLogs] = useState<Record<number, Message[]>>({});
-  const [messageUpdateTrigger, setMessageUpdateTrigger] = useState(0);
 
   useEffect(() => {
     const fetchLogs = async () => {
@@ -58,9 +57,6 @@ export default function MessageGrid({ connectedBots = [], updateTrigger, channel
   if (connectedBots.length === 0) {
     return <p className="text-white flex items-center justify-center h-full w-full font-bold text-3xl">Ни один из аккаунтов не подключён</p>;
   }
-
-  const rows = connectedBots.length > 4 ? 2 : 1;
-  const itemsPerRow = 4;
 
   return (
 <div className="flex h-full gap-3">

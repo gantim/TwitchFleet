@@ -17,14 +17,6 @@ export default function MainPage() {
   const [connectedBots, setConnectedBots] = useState<Bot[]>([]);
   const [messageUpdateTrigger, setMessageUpdateTrigger] = useState(0);
 
-  const connectedBotsMapped = useMemo(
-    () => connectedBots.map(bot => ({ id: bot.id, name: bot.name })),
-    [connectedBots]
-  );
-
-  const handleChannelChange = (value: string) => {
-    setChannel(value);
-  };
   return (
     <div className="w-screen h-screen overflow-hidden bg-[#3A3A3A] text-white flex">
       {/* Левый столбец */}
