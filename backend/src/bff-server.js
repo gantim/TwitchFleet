@@ -20,7 +20,14 @@ app.use(express.json());
 // });
 
 // Проверка Origin
-const allowedOrigins = [process.env.FRONTEND_URL];
+const allowedOrigins = [
+  process.env.FRONTEND_URL,           // основной фронт
+  'http://localhost:3000',            // локальная разработка
+  'http://31.58.171.165:3000',        // внешний IP
+  'http://26.71.193.128:3000',               // внешний IP
+  'http://127.0.0.1:3000',            // loopback
+  'https://yourdomain.com'
+];
 const corsOptions = {
   origin: function (origin, callback) {
     if (!origin) return callback(null, true);

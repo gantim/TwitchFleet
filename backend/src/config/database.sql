@@ -22,6 +22,21 @@ CREATE TABLE user_accounts (
   PRIMARY KEY (user_id, account_id)
 );
 
+CREATE TABLE connection_logs (
+  id SERIAL PRIMARY KEY,
+  account_id INTEGER REFERENCES accounts(id) ON DELETE CASCADE,
+  channel TEXT NOT NULL,
+  action TEXT NOT NULL CHECK (action IN ('connect', 'disconnect')),
+  timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE message_logs (
+  id SERIAL PRIMARY KEY,
+  account_id INTEGER REFERENCES accounts(id) ON DELETE CASCADE,
+  channel TEXT NOT NULL,
+  message TEXT NOT NULL,
+  timestamp TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
 
 список всех ботов по id:
 SELECT u.id, u.username, a.id AS account_id, a.username AS account_username
