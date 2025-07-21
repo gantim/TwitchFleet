@@ -4,8 +4,4 @@ const nextConfig: NextConfig = {
   /* config options here */
 };
 
-module.exports = {
-  output: 'standalone',
-};
-
 export default nextConfig;
