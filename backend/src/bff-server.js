@@ -27,7 +27,8 @@ const allowedOrigins = [
   'http://26.71.193.128:3000',               // внешний IP
   'http://213.176.65.26:3000',               // внешний IP
   'http://127.0.0.1:3000',            // loopback
-  'https://yourdomain.com'
+  'https://nv-server.online',
+  'http://nv-server.online'
 ];
 const corsOptions = {
   origin: function (origin, callback) {
